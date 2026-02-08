@@ -42,7 +42,7 @@ def right_card():
     global data_dict, word, data
     data_dict.remove(word)
     total = len(data_dict)
-    tx_total.config(text=f'Total:{total}')
+    tx_total.config(text=f'Total words: {total}')
     new_data = pd.DataFrame(data_dict)
     new_data.to_csv(output_path, index=False)
     pick_card()
@@ -76,21 +76,25 @@ card_background = canvas.create_image(400, 263, image=card_front_img)
 card_title = canvas.create_text(400, 150, text="Title", font=("Ariel", 40, "italic"))
 card_word = canvas.create_text(400, 263, text="", font=("Ariel", 60, "bold"))
 canvas.config(bg=BACKGROUND_COLOR, highlightthickness=0)
-canvas.grid(row=0, column=0, columnspan=3)
+canvas.grid(row=1, column=0, columnspan=3)
 
 pick_card()
 
 total = len(data_dict)
 
+# EUA_image = PhotoImage(file=resource_path("images/EUA.png"))
+# EUA_button = Button(image=EUA_image, highlightthickness=0, command=pick_card, bd=0, bg=BACKGROUND_COLOR)
+# EUA_button.grid(row=0, column=0)
+
 cross_image = PhotoImage(file=resource_path("images/wrong.png"))
 unknown_button = Button(image=cross_image, highlightthickness=0, command=pick_card, bd=0)
-unknown_button.grid(row=1, column=0)
+unknown_button.grid(row=2, column=0)
 
 check_image = PhotoImage(file=resource_path("images/right.png"))
 known_button = Button(image=check_image, highlightthickness=0, command=right_card, bd=0)
-known_button.grid(row=1, column=2)
+known_button.grid(row=2, column=2)
 
-tx_total = Label(text=f'Total:{total}', highlightthickness=0, bg=BACKGROUND_COLOR, bd=0, font=("Ariel", 30))
-tx_total.grid(row=1, column=1 )
+tx_total = Label(text=f'Total words: {total}', highlightthickness=0, bg=BACKGROUND_COLOR, bd=0, font=("Ariel", 30))
+tx_total.grid(row=2, column=1 )
 
 window.mainloop()
