@@ -13,3 +13,5 @@ O **Flashy** é um aplicativo de desktop interativo desenvolvido em Python para 
 - **Tkinter** (Interface Gráfica)
 - **Pandas** (Manipulação de dados/CSV)
 - **PyInstaller** (Para geração do executável)
+  
+- ![Interface do App Flashy](./images/project.png)
