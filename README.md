@@ -13,8 +13,3 @@ O **Flashy** é um aplicativo de desktop interativo desenvolvido em Python para 
 - **Tkinter** (Interface Gráfica)
 - **Pandas** (Manipulação de dados/CSV)
 - **PyInstaller** (Para geração do executável)
-
-## 📦 Como rodar o projeto
-1. Clone o repositório:
-   ```bash
-   git clone [https://github.com/GabrielParra23/flashcards-python-app.git](https://github.com/GabrielParra23/flashcards-python-app.git)
