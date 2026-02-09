@@ -8,6 +8,7 @@ import sys
 BACKGROUND_COLOR = "#B1DDC6"
 word = {}
 timer = None
+language = 'EUA'
 if getattr(sys, 'frozen', False):
     data_path = os.path.dirname(sys.executable)
 else:
@@ -22,7 +23,16 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 # ---------------------------- DATA ------------------------------- #
-output_path = os.path.join(data_path, "data/update_list.csv")
+def path():
+    global output_path
+    if language == 'EUA':
+        output_path = os.path.join(data_path, "data/update_list_EUA.csv")
+    elif language == 'French':
+        output_path = os.path.join(data_path, "data/update_list_french.csv")
+    elif language == 'spain':
+        output_path = os.path.join(data_path, "data/update_list_spain.csv")
+
+path()
 
 # Garante que a pasta 'data' existe onde o EXE está, senão o to_csv falha
 if not os.path.exists(os.path.join(data_path, "data")):
@@ -31,12 +41,55 @@ if not os.path.exists(os.path.join(data_path, "data")):
 try:
     data = pd.read_csv(output_path)
 except FileNotFoundError: 
-    data = pd.read_csv(resource_path("data/english-words.csv"))
+    data = pd.read_csv(resource_path("data/english_words.csv"))
 
 data_dict = data.to_dict(orient='records')
 
 
 # ---------------------------- CARDS ------------------------------- #
+def change_languege_EUA():
+    global data_dict, data, word, language
+    language = 'EUA'
+    path()
+    print(output_path)
+    try:
+        data = pd.read_csv(output_path)
+    except FileNotFoundError: 
+        data = pd.read_csv(resource_path("data/english_words.csv"))
+
+    data_dict = data.to_dict(orient='records')
+    total = len(data_dict)
+    tx_total.config(text=f'Total words: {total}')
+    pick_card()
+
+def change_languege_french():
+    global data_dict, data, word, language
+    language = 'French'
+    path()
+    print(output_path)
+    try:
+        data = pd.read_csv(output_path)
+    except FileNotFoundError: 
+        data = pd.read_csv(resource_path("data/french_words.csv"))
+    
+    data_dict = data.to_dict(orient='records')
+    total = len(data_dict)
+    tx_total.config(text=f'Total words: {total}')
+    pick_card()
+
+def change_languege_spain():
+    global data_dict, data, word, language
+    language = 'spain'
+    path()
+    print(output_path)
+    try:
+        data = pd.read_csv(output_path)
+    except FileNotFoundError: 
+        data = pd.read_csv(resource_path("data/spain_words.csv"))    
+    data_dict = data.to_dict(orient='records')
+    total = len(data_dict)
+    tx_total.config(text=f'Total words: {total}')
+    pick_card()
 
 def right_card():
     global data_dict, word, data
@@ -52,9 +105,12 @@ def pick_card():
     if timer:
         window.after_cancel(timer)
     word = choice(data_dict)
+    current_keys = list(word.keys())
+    foreign_language_key = [key for key in current_keys if key != 'Portugues'][0]
+
+    canvas.itemconfig(card_title, text=foreign_language_key, fill='black')
+    canvas.itemconfig(card_word, text=word[foreign_language_key], fill='black')
     canvas.itemconfig(card_background, image=card_front_img)
-    canvas.itemconfig(card_title, text='English', fill='black')
-    canvas.itemconfig(card_word, text=word['English'], fill='black')
     timer = window.after(3000, flip)
 
 def flip():
@@ -82,9 +138,18 @@ pick_card()
 
 total = len(data_dict)
 
-# EUA_image = PhotoImage(file=resource_path("images/EUA.png"))
-# EUA_button = Button(image=EUA_image, highlightthickness=0, command=pick_card, bd=0, bg=BACKGROUND_COLOR)
-# EUA_button.grid(row=0, column=0)
+EUA_image = PhotoImage(file=resource_path("images/EUA.png"))
+EUA_button = Button(image=EUA_image, highlightthickness=0, command=change_languege_EUA, bd=0, bg=BACKGROUND_COLOR)
+EUA_button.grid(row=0, column=0)
+
+french_image = PhotoImage(file=resource_path("images/french.png"))
+french_button = Button(image=french_image, highlightthickness=0, command=change_languege_french, bd=0, bg=BACKGROUND_COLOR)
+french_button.grid(row=0, column=1)
+
+spain_image = PhotoImage(file=resource_path("images/spain.png"))
+spain_button = Button(image=spain_image, highlightthickness=0, command=change_languege_spain, bd=0, bg=BACKGROUND_COLOR)
+spain_button.grid(row=0, column=2)
+
 
 cross_image = PhotoImage(file=resource_path("images/wrong.png"))
 unknown_button = Button(image=cross_image, highlightthickness=0, command=pick_card, bd=0)
