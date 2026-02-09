@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from random import choice, randint, shuffle
 import pandas as pd
+from pandas.errors import EmptyDataError
 import os
 import sys
 
@@ -9,6 +10,8 @@ BACKGROUND_COLOR = "#B1DDC6"
 word = {}
 timer = None
 language = 'EUA'
+data_dict = {}
+concluido = False
 if getattr(sys, 'frozen', False):
     data_path = os.path.dirname(sys.executable)
 else:
@@ -32,6 +35,14 @@ def path():
     elif language == 'spain':
         output_path = os.path.join(data_path, "data/update_list_spain.csv")
 
+def Finished():
+    if timer:
+        window.after_cancel(timer)
+    canvas.itemconfig(card_background, image=card_front_img)
+    canvas.itemconfig(card_title, text='Parabéns ', fill='black')
+    canvas.itemconfig(card_word, text='Você completou a lista', fill='black', font=("Ariel", 40, "bold"))   
+    tx_total.config(text=f'Total words: 0')
+
 path()
 
 # Garante que a pasta 'data' existe onde o EXE está, senão o to_csv falha
@@ -42,76 +53,105 @@ try:
     data = pd.read_csv(output_path)
 except FileNotFoundError: 
     data = pd.read_csv(resource_path("data/english_words.csv"))
+except EmptyDataError:
+    concluido = True
 
-data_dict = data.to_dict(orient='records')
+if not concluido:
+    data_dict = data.to_dict(orient='records')
 
 
-# ---------------------------- CARDS ------------------------------- #
+# ---------------------------- CARDS ------------------------------- #   
+
 def change_languege_EUA():
-    global data_dict, data, word, language
+    global data_dict, data, word, language, concluido
     language = 'EUA'
     path()
     print(output_path)
     try:
         data = pd.read_csv(output_path)
+        concluido = False
     except FileNotFoundError: 
         data = pd.read_csv(resource_path("data/english_words.csv"))
-
-    data_dict = data.to_dict(orient='records')
-    total = len(data_dict)
-    tx_total.config(text=f'Total words: {total}')
-    pick_card()
+        concluido = False
+    except EmptyDataError:
+        concluido = True
+    if concluido:
+        Finished()
+    else:     
+        data_dict = data.to_dict(orient='records')
+        total = len(data_dict)
+        tx_total.config(text=f'Total words: {total}')
+        pick_card()
 
 def change_languege_french():
-    global data_dict, data, word, language
+    global data_dict, data, word, language, concluido
     language = 'French'
     path()
     print(output_path)
     try:
         data = pd.read_csv(output_path)
+        concluido = False
     except FileNotFoundError: 
         data = pd.read_csv(resource_path("data/french_words.csv"))
-    
-    data_dict = data.to_dict(orient='records')
-    total = len(data_dict)
-    tx_total.config(text=f'Total words: {total}')
-    pick_card()
+        concluido = False
+    except EmptyDataError:
+        concluido = True
+    if concluido:
+        Finished()
+    else:     
+        data_dict = data.to_dict(orient='records')
+        total = len(data_dict)
+        tx_total.config(text=f'Total words: {total}')
+        pick_card()
 
 def change_languege_spain():
-    global data_dict, data, word, language
+    global data_dict, data, word, language, concluido
     language = 'spain'
     path()
     print(output_path)
     try:
         data = pd.read_csv(output_path)
+        concluido = False
     except FileNotFoundError: 
-        data = pd.read_csv(resource_path("data/spain_words.csv"))    
-    data_dict = data.to_dict(orient='records')
-    total = len(data_dict)
-    tx_total.config(text=f'Total words: {total}')
-    pick_card()
+        data = pd.read_csv(resource_path("data/spain_words.csv")) 
+        concluido = False 
+    except EmptyDataError:
+        concluido = True
+    if concluido:
+        Finished()
+    else:     
+        data_dict = data.to_dict(orient='records')
+        total = len(data_dict)
+        tx_total.config(text=f'Total words: {total}')
+        pick_card()
 
 def right_card():
     global data_dict, word, data
-    data_dict.remove(word)
-    total = len(data_dict)
-    tx_total.config(text=f'Total words: {total}')
-    new_data = pd.DataFrame(data_dict)
-    new_data.to_csv(output_path, index=False)
-    pick_card()
+    if not concluido:
+        data_dict.remove(word)
+        total = len(data_dict)
+        tx_total.config(text=f'Total words: {total}')
+        new_data = pd.DataFrame(data_dict)
+        new_data.to_csv(output_path, index=False)
+        pick_card()
     
 def pick_card():
     global word, timer
+    total = len(data_dict)
     if timer:
         window.after_cancel(timer)
-    word = choice(data_dict)
-    current_keys = list(word.keys())
-    foreign_language_key = [key for key in current_keys if key != 'Portugues'][0]
+    if not concluido:
+        word = choice(data_dict)
+        current_keys = list(word.keys())
+        foreign_language_key = [key for key in current_keys if key != 'Portugues'][0]
 
-    canvas.itemconfig(card_title, text=foreign_language_key, fill='black')
-    canvas.itemconfig(card_word, text=word[foreign_language_key], fill='black')
-    canvas.itemconfig(card_background, image=card_front_img)
-    timer = window.after(3000, flip)
+        canvas.itemconfig(card_title, text=foreign_language_key, fill='black')
+        canvas.itemconfig(card_word, text=word[foreign_language_key], fill='black')
+        canvas.itemconfig(card_background, image=card_front_img)
+        timer = window.after(3000, flip)
+    else:
+        Finished()
+
 
 def flip():
     canvas.itemconfig(card_background, image=card_back_img)
@@ -134,7 +174,6 @@ card_word = canvas.create_text(400, 263, text="", font=("Ariel", 60, "bold"))
 canvas.config(bg=BACKGROUND_COLOR, highlightthickness=0)
 canvas.grid(row=1, column=0, columnspan=3)
 
-pick_card()
 
 total = len(data_dict)
 
@@ -161,5 +200,10 @@ known_button.grid(row=2, column=2)
 
 tx_total = Label(text=f'Total words: {total}', highlightthickness=0, bg=BACKGROUND_COLOR, bd=0, font=("Ariel", 30))
 tx_total.grid(row=2, column=1 )
+
+if concluido:
+    Finished()
+else:
+    pick_card()
 
 window.mainloop()
