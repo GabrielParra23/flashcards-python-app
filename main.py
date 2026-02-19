@@ -61,6 +61,12 @@ if not concluido:
 
 
 # ---------------------------- CARDS ------------------------------- #   
+def on_resize(event):
+    w, h = event.width, event.height
+    canvas.coords(card_background, w/2, h/2)
+    canvas.coords(card_title, w/2, h * 0.3)
+    canvas.coords(card_word, w/2, h/2)
+    canvas.itemconfig(card_word, width=w*0.8)
 
 def change_languege_EUA():
     global data_dict, data, word, language, concluido
@@ -163,43 +169,50 @@ def flip():
 
 window = Tk()
 window.title("Flashy")
-window.config(padx=50, pady=50, bg=BACKGROUND_COLOR)
+window.state('zoomed')
+window.config(padx=20, pady=20, bg=BACKGROUND_COLOR)
 
-canvas = Canvas(width=800, height=526)
+window.columnconfigure((0, 1, 2), weight=1)
+window.rowconfigure(1, weight=1)
+
+canvas = Canvas(window, bg=BACKGROUND_COLOR, highlightthickness=0, width=500, height=350)
+canvas.grid(row=1, column=0, columnspan=3, sticky="nsew")
+
 card_front_img = PhotoImage(file=resource_path("images/card_front.png"))
 card_back_img = PhotoImage(file=resource_path("images/card_back.png"))
-card_background = canvas.create_image(400, 263, image=card_front_img)
-card_title = canvas.create_text(400, 150, text="Title", font=("Ariel", 40, "italic"))
-card_word = canvas.create_text(400, 263, text="", font=("Ariel", 60, "bold"))
-canvas.config(bg=BACKGROUND_COLOR, highlightthickness=0)
-canvas.grid(row=1, column=0, columnspan=3)
+
+card_background = canvas.create_image(0, 0, image=card_front_img)
+card_title = canvas.create_text(0, 0, text="", font=("Ariel", 40, "italic"))
+card_word = canvas.create_text(0, 0, text="", font=("Ariel", 60, "bold"))
+
+canvas.bind("<Configure>", on_resize)
 
 
 total = len(data_dict)
 
 EUA_image = PhotoImage(file=resource_path("images/EUA.png"))
 EUA_button = Button(image=EUA_image, highlightthickness=0, command=change_languege_EUA, bd=0, bg=BACKGROUND_COLOR)
-EUA_button.grid(row=0, column=0)
+EUA_button.grid(row=0, column=0, sticky="n", pady=10)
 
 french_image = PhotoImage(file=resource_path("images/french.png"))
 french_button = Button(image=french_image, highlightthickness=0, command=change_languege_french, bd=0, bg=BACKGROUND_COLOR)
-french_button.grid(row=0, column=1)
+french_button.grid(row=0, column=1, sticky="n", pady=10)
 
 spain_image = PhotoImage(file=resource_path("images/spain.png"))
 spain_button = Button(image=spain_image, highlightthickness=0, command=change_languege_spain, bd=0, bg=BACKGROUND_COLOR)
-spain_button.grid(row=0, column=2)
+spain_button.grid(row=0, column=2, sticky="n", pady=10)
 
 
 cross_image = PhotoImage(file=resource_path("images/wrong.png"))
 unknown_button = Button(image=cross_image, highlightthickness=0, command=pick_card, bd=0)
-unknown_button.grid(row=2, column=0)
+unknown_button.grid(row=2, column=0, sticky="s", pady=10)
 
 check_image = PhotoImage(file=resource_path("images/right.png"))
 known_button = Button(image=check_image, highlightthickness=0, command=right_card, bd=0)
-known_button.grid(row=2, column=2)
+known_button.grid(row=2, column=2, sticky="s", pady=10)
 
 tx_total = Label(text=f'Total words: {total}', highlightthickness=0, bg=BACKGROUND_COLOR, bd=0, font=("Ariel", 30))
-tx_total.grid(row=2, column=1 )
+tx_total.grid(row=2, column=1, sticky="s", pady=10)
 
 if concluido:
     Finished()
